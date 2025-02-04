@@ -32,6 +32,13 @@ func BenchmarkInt64Adds(b *testing.B) {
             }
         })
 
+        b.Run(fmt.Sprintf("Int64Slice_SSE2Add_%d", length), func(b *testing.B) {
+            p1, p2, po, l := getInt64BenchmarkParams(uint64(length))
+            for i := 0; i < b.N; i++ {
+                amd64.AddInt64SSE2(p1, p2, po, l)
+            }
+        })
+
         b.Run(fmt.Sprintf("Int64Slice_AVX2Add_%d", length), func(b *testing.B) {
             p1, p2, po, l := getInt64BenchmarkParams(uint64(length))
             for i := 0; i < b.N; i++ {

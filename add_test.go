@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func getBigInt64Slice(size, offset int64) ([]int64, []int64, []int64) {
+func getBigInt64Slice(size, offset uint64) ([]int64, []int64, []int64) {
 	v1 := make([]int64, size)
 	v2 := make([]int64, size)
 	vo := make([]int64, size)
-	for i := int64(0); i < size; i += 1 {
+	for i := uint64(0); i < size; i += 1 {
 		v1[i] = int64(i)
 		v2[i] = int64(i + offset)
 		vo[i] = int64(i) + int64(i + offset)
@@ -42,7 +42,8 @@ func TestAddInt64(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := AddInt64(tt.v1, tt.v2)
+			got := make([]int64, len(tt.v1))
+			AddInt64(tt.v1, tt.v2, got)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("AddInt64(%v, %v) = %v; want %v",
 					tt.v1, tt.v2, got, tt.want)

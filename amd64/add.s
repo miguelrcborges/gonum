@@ -1,9 +1,26 @@
 #include "textflag.h"
 
+TEXT ·AddInt64Scalar(SB), NOSPLIT, $32
+	MOVQ v0+0(FP), AX
+	MOVQ v1+8(FP), BX
+	MOVQ vo+16(FP), CX
+	MOVQ l+24(FP), DX
+
+	XORQ SI, SI
+loop:
+	MOVQ (AX)(SI*8), DI
+	ADDQ (BX)(SI*8), DI
+	MOVQ DI, (CX)
+	INCQ SI
+	CMPQ SI, DX
+	JB loop
+	RET
+
+
 TEXT ·AddInt64AVX2(SB), NOSPLIT, $32
 	MOVQ v0+0(FP), AX
 	MOVQ v1+8(FP), BX
-	MOVQ v1+16(FP), CX
+	MOVQ vo+16(FP), CX
 	MOVQ l+24(FP), DX
 
 	MOVQ DX, DI

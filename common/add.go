@@ -2,7 +2,7 @@ package common
 
 import "unsafe"
 
-func AddInt64(v1, v2, vo unsafe.Pointer, l int64) {
+func AddInt64(v1, v2, vo unsafe.Pointer, l uint64) {
 	for l > 0 {
 		*(*uint64)(vo)= *(*uint64)(v1) + *(*uint64)(v2)
 		vo = unsafe.Add(vo, 8)

@@ -22,4 +22,5 @@ func init() {
 	SSE4_2 = (ecx & (1 << 20)) != 0
 
 	UnsafeAddInt64 = amd64.AddInt64SSE2
+	UnsafeAddInt32 = amd64.AddInt32SSE2
 }

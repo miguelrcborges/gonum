@@ -1,5 +1,7 @@
 #include "textflag.h"
 
+// 64 bit
+
 TEXT ·AddInt64Scalar(SB), NOSPLIT, $32
 	MOVQ v0+0(FP), AX
 	MOVQ v1+8(FP), BX
@@ -24,8 +26,8 @@ TEXT ·AddInt64SSE2(SB), NOSPLIT, $32
 	MOVQ l+24(FP), DX
 
 	MOVQ DX, DI
-	ANDQ $0xFFFFFFFFFFFFFFFB, DX
-	ANDQ $0x4, DI
+	ANDQ $0xFFFFFFFFFFFFFFFC, DX
+	ANDQ $0x3, DI
 
 	TESTQ DX, DX
 	JZ scalar_part
@@ -43,15 +45,14 @@ vector_loop:
 	CMPQ SI, DX
 	JB vector_loop
 
-	// Can be here since we know for sure
-	// slices len isn't 0
 	TESTQ DI, DI
 	JZ end
-scalar_part:
+
 	LEAQ (AX)(DX*8), AX
 	LEAQ (BX)(DX*8), BX
 	LEAQ (CX)(DX*8), CX
 
+scalar_part:
 	MOVQ (AX), SI
 	ADDQ (BX), SI
 	MOVQ SI, (CX)
@@ -99,15 +100,14 @@ vector_loop:
 	CMPQ SI, DX
 	JB vector_loop
 
-	// Can be here since we know for sure
-	// slices len isn't 0
 	TESTQ DI, DI
 	JZ end
-scalar_part:
+
 	LEAQ (AX)(DX*8), AX
 	LEAQ (BX)(DX*8), BX
 	LEAQ (CX)(DX*8), CX
 
+scalar_part:
 	MOVQ (AX), SI
 	ADDQ (BX), SI
 	MOVQ SI, (CX)
@@ -147,6 +147,159 @@ scalar_part:
 	MOVQ 48(AX), SI
 	ADDQ 48(BX), SI
 	MOVQ SI, 48(CX)
+
+end:
+	VZEROUPPER
+	RET
+
+
+
+// 32 bit
+
+TEXT ·AddInt32SSE2(SB), NOSPLIT, $32
+	MOVQ v0+0(FP), AX
+	MOVQ v1+8(FP), BX
+	MOVQ vo+16(FP), CX
+	MOVQ l+24(FP), DX
+
+	MOVQ DX, DI
+	ANDQ $0xFFFFFFFFFFFFFFF8, DX
+	ANDQ $0x7, DI
+
+	TESTQ DX, DX
+	JZ scalar_part
+	XORQ SI, SI
+
+vector_loop:
+	VMOVDQU (AX)(SI*4), X0
+	VMOVDQU 16(AX)(SI*4), X1
+	PADDD (BX)(SI*4), X0
+	PADDD 16(BX)(SI*4), X1
+	VMOVDQU X0, (CX)(SI*4)
+	VMOVDQU X1, 16(CX)(SI*4)
+
+	ADDQ $8, SI
+	CMPQ SI, DX
+	JB vector_loop
+
+	TESTQ DI, DI
+	JZ end
+
+	LEAQ (AX)(DX*4), AX
+	LEAQ (BX)(DX*4), BX
+	LEAQ (CX)(DX*4), CX
+
+scalar_part:
+	MOVQ (AX), SI
+	ADDQ (BX), SI
+	MOVQ SI, (CX)
+	CMPQ DI, $1
+	JE end
+
+	MOVQ 4(AX), SI
+	ADDQ 4(BX), SI
+	MOVQ SI, 4(CX)
+	CMPQ DI, $2
+	JE end
+
+	MOVQ 8(AX), SI
+	ADDQ 8(BX), SI
+	MOVQ SI, 8(CX)
+	CMPQ DI, $3
+	JE end
+
+	MOVQ 12(AX), SI
+	ADDQ 12(BX), SI
+	MOVQ SI, 12(CX)
+	CMPQ DI, $4
+	JE end
+
+	MOVQ 16(AX), SI
+	ADDQ 16(BX), SI
+	MOVQ SI, 16(CX)
+	CMPQ DI, $5
+	JE end
+
+	MOVQ 20(AX), SI
+	ADDQ 20(BX), SI
+	MOVQ SI, 20(CX)
+	CMPQ DI, $6
+	JE end
+
+	MOVQ 24(AX), SI
+	ADDQ 24(BX), SI
+	MOVQ SI, 24(CX)
+
+end:
+	RET
+
+
+
+TEXT ·AddInt32AVX2(SB), NOSPLIT, $32
+	MOVQ v0+0(FP), AX
+	MOVQ v1+8(FP), BX
+	MOVQ vo+16(FP), CX
+	MOVQ l+24(FP), DX
+
+	MOVQ DX, DI
+	ANDQ $0xFFFFFFFFFFFFFFF0, DX
+	ANDQ $0xF, DI
+
+	TESTQ DX, DX
+	JZ try_fast_four
+	XORQ SI, SI
+
+vector_loop:
+	VMOVDQU (AX)(SI*4), Y0
+	VMOVDQU 32(AX)(SI*4), Y1
+	VPADDD (BX)(SI*4), Y0, Y0
+	VPADDD 32(BX)(SI*4), Y1, Y1
+	VMOVDQU Y0, (CX)(SI*4)
+	VMOVDQU Y1, 32(CX)(SI*4)
+
+	ADDQ $8, SI
+	CMPQ SI, DX
+	JB vector_loop
+
+	TESTQ DI, DI
+	JZ end
+
+	LEAQ (AX)(DX*4), AX
+	LEAQ (BX)(DX*4), BX
+	LEAQ (CX)(DX*4), CX
+
+try_fast_four:
+	CMPQ DI, $4
+	JB scalar_part
+
+	VMOVDQU (AX), X0
+	VPADDD (BX), X0, X0
+	VMOVDQU X0, (CX)
+
+	ADDQ $4, AX
+	ADDQ $4, BX
+	ADDQ $4, CX
+	SUBQ $4, DI
+
+	CMPQ DI, $0
+	JE end
+
+scalar_part:
+	MOVQ (AX), SI
+	ADDQ (BX), SI
+	MOVQ SI, (CX)
+	CMPQ DI, $1
+	JE end
+
+	MOVQ 8(AX), SI
+	ADDQ 8(BX), SI
+	MOVQ SI, 8(CX)
+	CMPQ DI, $2
+	JE end
+
+	MOVQ 16(AX), SI
+	ADDQ 16(BX), SI
+	MOVQ SI, 16(CX)
 
 end:
 	VZEROUPPER

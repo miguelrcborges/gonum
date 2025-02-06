@@ -5,21 +5,25 @@ import (
 	"testing"
 )
 
-func getBigInt64Slice(size, offset uint64) ([]int64, []int64, []int64) {
-	v1 := make([]int64, size)
-	v2 := make([]int64, size)
-	vo := make([]int64, size)
-	for i := uint64(0); i < size; i += 1 {
-		v1[i] = int64(i)
-		v2[i] = int64(i + offset)
-		vo[i] = int64(i) + int64(i + offset)
+type Int interface {
+    int | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64
+}
+
+func getBigSlice[T Int](size, offset int) ([]T, []T, []T) {
+	v1 := make([]T, size)
+	v2 := make([]T, size)
+	vo := make([]T, size)
+	for i := 0; i < size; i += 1 {
+		v1[i] = T(i)
+		v2[i] = T(i + offset)
+		vo[i] = T(i) + T(i + offset)
 	}
 	return v1, v2, vo
 }
 
 
 func TestAddInt64(t *testing.T) {
-	lv1, lv2, lsum := getBigInt64Slice(1024, 1024)
+	lv1, lv2, lsum := getBigSlice[int64](1024, 1024)
 
 	tests := []struct {
 		name   string
@@ -31,6 +35,12 @@ func TestAddInt64(t *testing.T) {
 			v1: []int64{},
 			v2: []int64{},
 			want: []int64{},
+		},
+		{
+			name: "small that will force to go scalar",
+			v1: []int64{2, 3},
+			v2: []int64{4, 5},
+			want: []int64{6, 8},
 		},
 		{
 			name: "large 1",
@@ -51,3 +61,45 @@ func TestAddInt64(t *testing.T) {
 		})
 	}
 }
+
+
+func TestAddInt32(t *testing.T) {
+	lv1, lv2, lsum := getBigSlice[int32](1024, 1024)
+
+	tests := []struct {
+		name   string
+		v1, v2 []int32
+		want   []int32
+	}{
+		{
+			name: "both empty slices",
+			v1: []int32{},
+			v2: []int32{},
+			want: []int32{},
+		},
+		{
+			name: "small that will force to go scalar",
+			v1: []int32{2, 3},
+			v2: []int32{4, 5},
+			want: []int32{6, 8},
+		},
+		{
+			name: "large 1",
+			v1: lv1,
+			v2: lv2,
+			want: lsum,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := make([]int32, len(tt.v1))
+			AddInt32(tt.v1, tt.v2, got)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddInt64(%v, %v) = %v; want %v",
+					tt.v1, tt.v2, got, tt.want)
+			}
+		})
+	}
+}
+

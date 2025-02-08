@@ -29,8 +29,8 @@ TEXT ·AddInt64SSE2(SB), NOSPLIT, $32
 	ANDQ $0xFFFFFFFFFFFFFFFC, DX
 	ANDQ $0x3, DI
 
-	TESTQ DX, DX
-	JZ scalar_part
+	TESTL DX, DX
+	JE scalar_part
 	XORQ SI, SI
 
 vector_loop:
@@ -45,8 +45,8 @@ vector_loop:
 	CMPQ SI, DX
 	JB vector_loop
 
-	TESTQ DI, DI
-	JZ end
+	TESTL DI, DI
+	JE end
 
 	LEAQ (AX)(DX*8), AX
 	LEAQ (BX)(DX*8), BX
@@ -84,8 +84,8 @@ TEXT ·AddInt64AVX2(SB), NOSPLIT, $32
 	ANDQ $0xFFFFFFFFFFFFFFF8, DX
 	ANDQ $0x7, DI
 
-	TESTQ DX, DX
-	JZ scalar_part
+	TESTL DX, DX
+	JE scalar_part
 	XORQ SI, SI
 
 vector_loop:
@@ -100,8 +100,8 @@ vector_loop:
 	CMPQ SI, DX
 	JB vector_loop
 
-	TESTQ DI, DI
-	JZ end
+	TESTL DI, DI
+	JE end
 
 	LEAQ (AX)(DX*8), AX
 	LEAQ (BX)(DX*8), BX
@@ -111,37 +111,37 @@ scalar_part:
 	MOVQ (AX), SI
 	ADDQ (BX), SI
 	MOVQ SI, (CX)
-	CMPQ DI, $1
+	CMPL DI, $1
 	JE end
 
 	MOVQ 8(AX), SI
 	ADDQ 8(BX), SI
 	MOVQ SI, 8(CX)
-	CMPQ DI, $2
+	CMPL DI, $2
 	JE end
 
 	MOVQ 16(AX), SI
 	ADDQ 16(BX), SI
 	MOVQ SI, 16(CX)
-	CMPQ DI, $3
+	CMPL DI, $3
 	JE end
 
 	MOVQ 24(AX), SI
 	ADDQ 24(BX), SI
 	MOVQ SI, 24(CX)
-	CMPQ DI, $4
+	CMPL DI, $4
 	JE end
 
 	MOVQ 32(AX), SI
 	ADDQ 32(BX), SI
 	MOVQ SI, 32(CX)
-	CMPQ DI, $5
+	CMPL DI, $5
 	JE end
 
 	MOVQ 40(AX), SI
 	ADDQ 40(BX), SI
 	MOVQ SI, 40(CX)
-	CMPQ DI, $6
+	CMPL DI, $6
 	JE end
 
 	MOVQ 48(AX), SI
@@ -166,8 +166,8 @@ TEXT ·AddInt32SSE2(SB), NOSPLIT, $32
 	ANDQ $0xFFFFFFFFFFFFFFF8, DX
 	ANDQ $0x7, DI
 
-	TESTQ DX, DX
-	JZ scalar_part
+	TESTL DX, DX
+	JE scalar_part
 	XORQ SI, SI
 
 vector_loop:
@@ -182,53 +182,53 @@ vector_loop:
 	CMPQ SI, DX
 	JB vector_loop
 
-	TESTQ DI, DI
-	JZ end
+	TESTL DI, DI
+	JE end
 
 	LEAQ (AX)(DX*4), AX
 	LEAQ (BX)(DX*4), BX
 	LEAQ (CX)(DX*4), CX
 
 scalar_part:
-	MOVQ (AX), SI
-	ADDQ (BX), SI
-	MOVQ SI, (CX)
-	CMPQ DI, $1
+	MOVL (AX), SI
+	ADDL (BX), SI
+	MOVL SI, (CX)
+	CMPL DI, $1
 	JE end
 
-	MOVQ 4(AX), SI
-	ADDQ 4(BX), SI
-	MOVQ SI, 4(CX)
-	CMPQ DI, $2
+	MOVL 4(AX), SI
+	ADDL 4(BX), SI
+	MOVL SI, 4(CX)
+	CMPL DI, $2
 	JE end
 
-	MOVQ 8(AX), SI
-	ADDQ 8(BX), SI
-	MOVQ SI, 8(CX)
-	CMPQ DI, $3
+	MOVL 8(AX), SI
+	ADDL 8(BX), SI
+	MOVL SI, 8(CX)
+	CMPL DI, $3
 	JE end
 
-	MOVQ 12(AX), SI
-	ADDQ 12(BX), SI
-	MOVQ SI, 12(CX)
-	CMPQ DI, $4
+	MOVL 12(AX), SI
+	ADDL 12(BX), SI
+	MOVL SI, 12(CX)
+	CMPL DI, $4
 	JE end
 
-	MOVQ 16(AX), SI
-	ADDQ 16(BX), SI
-	MOVQ SI, 16(CX)
-	CMPQ DI, $5
+	MOVL 16(AX), SI
+	ADDL 16(BX), SI
+	MOVL SI, 16(CX)
+	CMPL DI, $5
 	JE end
 
-	MOVQ 20(AX), SI
-	ADDQ 20(BX), SI
-	MOVQ SI, 20(CX)
-	CMPQ DI, $6
+	MOVL 20(AX), SI
+	ADDL 20(BX), SI
+	MOVL SI, 20(CX)
+	CMPL DI, $6
 	JE end
 
-	MOVQ 24(AX), SI
-	ADDQ 24(BX), SI
-	MOVQ SI, 24(CX)
+	MOVL 24(AX), SI
+	ADDL 24(BX), SI
+	MOVL SI, 24(CX)
 
 end:
 	RET
@@ -245,8 +245,8 @@ TEXT ·AddInt32AVX2(SB), NOSPLIT, $32
 	ANDQ $0xFFFFFFFFFFFFFFF0, DX
 	ANDQ $0xF, DI
 
-	TESTQ DX, DX
-	JZ try_fast_four
+	TESTL DX, DX
+	JE try_fast_four
 	XORQ SI, SI
 
 vector_loop:
@@ -257,12 +257,12 @@ vector_loop:
 	VMOVDQU Y0, (CX)(SI*4)
 	VMOVDQU Y1, 32(CX)(SI*4)
 
-	ADDQ $8, SI
+	ADDQ $16, SI
 	CMPQ SI, DX
 	JB vector_loop
 
-	TESTQ DI, DI
-	JZ end
+	TESTL DI, DI
+	JE end
 
 	LEAQ (AX)(DX*4), AX
 	LEAQ (BX)(DX*4), BX
@@ -279,28 +279,198 @@ try_fast_four:
 	ADDQ $4, AX
 	ADDQ $4, BX
 	ADDQ $4, CX
-	SUBQ $4, DI
+	SUBQ $2, DI
 
-	CMPQ DI, $0
+	TESTL DI, DI
 	JE end
 
 scalar_part:
-	MOVQ (AX), SI
-	ADDQ (BX), SI
-	MOVQ SI, (CX)
-	CMPQ DI, $1
+	MOVL (AX), SI
+	ADDL (BX), SI
+	MOVL SI, (CX)
+	CMPL DI, $1
 	JE end
 
-	MOVQ 8(AX), SI
-	ADDQ 8(BX), SI
-	MOVQ SI, 8(CX)
-	CMPQ DI, $2
+	MOVL 8(AX), SI
+	ADDL 8(BX), SI
+	MOVL SI, 8(CX)
+	CMPL DI, $2
 	JE end
 
-	MOVQ 16(AX), SI
-	ADDQ 16(BX), SI
-	MOVQ SI, 16(CX)
+	MOVL 16(AX), SI
+	ADDL 16(BX), SI
+	MOVL SI, 16(CX)
 
 end:
 	VZEROUPPER
 	RET
+
+
+
+// 16 bits
+
+TEXT ·AddInt16SSE2(SB), NOSPLIT, $32
+	MOVQ v0+0(FP), AX
+	MOVQ v1+8(FP), BX
+	MOVQ vo+16(FP), CX
+	MOVQ l+24(FP), DX
+
+	MOVQ DX, DI
+	ANDQ $0xFFFFFFFFFFFFFFF0, DX
+	ANDQ $0xF, DI
+
+	TESTL DX, DX
+	JE try_fast_eight
+	XORQ SI, SI
+
+vector_loop:
+	VMOVDQU (AX)(SI*2), X0
+	VMOVDQU 16(AX)(SI*2), X1
+	PADDW (BX)(SI*2), X0
+	PADDW 16(BX)(SI*2), X1
+	VMOVDQU X0, (CX)(SI*2)
+	VMOVDQU X1, 16(CX)(SI*2)
+
+	ADDQ $16, SI
+	CMPQ SI, DX
+	JB vector_loop
+
+	TESTL DI, DI
+	JE end
+
+	LEAQ (AX)(DX*2), AX
+	LEAQ (BX)(DX*2), BX
+	LEAQ (CX)(DX*2), CX
+
+try_fast_eight:
+	CMPL DI, $8
+	JB scalar_part
+
+	VMOVDQU (AX), X0
+	PADDW (BX), X0
+	VMOVDQU X0, (CX)
+
+	ADDQ $8, AX
+	ADDQ $8, BX
+	ADDQ $8, CX
+	SUBL $8, DI
+
+	TESTL DI, DI
+	JE end 
+
+scalar_part:
+	MOVW (AX), SI
+	ADDW (BX), SI
+	MOVW SI, (CX)
+	CMPL DI, $1
+	JE end
+
+	MOVW 2(AX), SI
+	ADDW 2(BX), SI
+	MOVW SI, 2(CX)
+	CMPL DI, $2
+	JE end
+
+	MOVQ 4(AX), SI
+	ADDQ 4(BX), SI
+	MOVQ SI, 4(CX)
+	CMPL DI, $3
+	JE end
+
+	MOVQ 6(AX), SI
+	ADDQ 6(BX), SI
+	MOVQ SI, 6(CX)
+	CMPL DI, $4
+	JE end
+
+	MOVW 8(AX), SI
+	ADDW 8(BX), SI
+	MOVW SI, 8(CX)
+	CMPL DI, $5
+	JE end
+
+	MOVW 10(AX), SI
+	ADDW 10(BX), SI
+	MOVW SI, 10(CX)
+	CMPL DI, $6
+	JE end
+
+	MOVW 12(AX), SI
+	ADDW 12(BX), SI
+	MOVW SI, 12(CX)
+
+end:
+	RET
+
+
+
+TEXT ·AddInt16AVX2(SB), NOSPLIT, $32
+	MOVQ v0+0(FP), AX
+	MOVQ v1+8(FP), BX
+	MOVQ vo+16(FP), CX
+	MOVQ l+24(FP), DX
+
+	MOVQ DX, DI
+	ANDQ $0xFFFFFFFFFFFFFF00, DX
+	ANDQ $0xFF, DI
+
+	TESTL DX, DX
+	JE vector_loop2
+	XORQ SI, SI
+
+vector_loop:
+	VMOVDQU (AX)(SI*2), Y0
+	VMOVDQU 32(AX)(SI*2), Y1
+	VPADDD (BX)(SI*2), Y0, Y0
+	VPADDD 32(BX)(SI*2), Y1, Y1
+	VMOVDQU Y0, (CX)(SI*2)
+	VMOVDQU Y1, 32(CX)(SI*2)
+
+	ADDQ $32, SI
+	CMPQ SI, DX
+	JB vector_loop
+
+	TESTL DI, DI
+	JE end
+
+	LEAQ (AX)(DX*4), AX
+	LEAQ (BX)(DX*4), BX
+	LEAQ (CX)(DX*4), CX
+
+vector_loop2:
+	CMPQ DI, $4
+	JB scalar_part
+
+	VMOVDQU (AX), X0
+	VPADDD (BX), X0, X0
+	VMOVDQU X0, (CX)
+
+	ADDQ $8, AX
+	ADDQ $8, BX
+	ADDQ $8, CX
+	SUBQ $4, DI
+
+scalar_part:
+	TESTL DI, DI
+	JE end
+
+	MOVL (AX), SI
+	ADDL (BX), SI
+	MOVL SI, (CX)
+	CMPL DI, $1
+	JE end
+
+	MOVL 8(AX), SI
+	ADDL 8(BX), SI
+	MOVL SI, 8(CX)
+	CMPL DI, $2
+	JE end
+
+	MOVL 16(AX), SI
+	ADDL 16(BX), SI
+	MOVL SI, 16(CX)
+
+end:
+	VZEROUPPER
+	RET
+

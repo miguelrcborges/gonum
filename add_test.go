@@ -96,7 +96,48 @@ func TestAddInt32(t *testing.T) {
 			got := make([]int32, len(tt.v1))
 			AddInt32(tt.v1, tt.v2, got)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddInt64(%v, %v) = %v; want %v",
+				t.Errorf("AddInt32(%v, %v) = %v; want %v",
+					tt.v1, tt.v2, got, tt.want)
+			}
+		})
+	}
+}
+
+
+func TestAddInt16(t *testing.T) {
+	lv1, lv2, lsum := getBigSlice[int16](1024, 1024)
+
+	tests := []struct {
+		name   string
+		v1, v2 []int16
+		want   []int16
+	}{
+		{
+			name: "both empty slices",
+			v1: []int16{},
+			v2: []int16{},
+			want: []int16{},
+		},
+		{
+			name: "small that will force to go scalar",
+			v1: []int16{2, 3},
+			v2: []int16{4, 5},
+			want: []int16{6, 8},
+		},
+		{
+			name: "large 1",
+			v1: lv1,
+			v2: lv2,
+			want: lsum,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := make([]int16, len(tt.v1))
+			AddInt16(tt.v1, tt.v2, got)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddInt16(%v, %v) = %v; want %v",
 					tt.v1, tt.v2, got, tt.want)
 			}
 		})

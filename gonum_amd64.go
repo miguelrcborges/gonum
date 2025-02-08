@@ -23,4 +23,5 @@ func init() {
 
 	UnsafeAddInt64 = amd64.AddInt64SSE2
 	UnsafeAddInt32 = amd64.AddInt32SSE2
+	UnsafeAddInt16 = amd64.AddInt16SSE2
 }

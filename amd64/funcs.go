@@ -10,3 +10,6 @@ func AddInt64AVX2(v1, v2, vo unsafe.Pointer, l uint64)
 
 func AddInt32SSE2(v1, v2, vo unsafe.Pointer, l uint64)
 func AddInt32AVX2(v1, v2, vo unsafe.Pointer, l uint64)
+
+func AddInt16SSE2(v1, v2, vo unsafe.Pointer, l uint64)
+func AddInt16AVX2(v1, v2, vo unsafe.Pointer, l uint64)
